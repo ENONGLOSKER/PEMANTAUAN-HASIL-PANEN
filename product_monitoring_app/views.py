@@ -9,27 +9,50 @@ from django.contrib.auth.decorators import login_required
 import json
 from decimal import Decimal
 
+# model tren
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import HasilPanen
+from datetime import timedelta, date
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
-# fitur TAMBAHAN -------------------------------
-@login_required 
+@login_required
 def prediksi_hasil_panen(request):
-    
+    try:
+        # Ambil data panen dari database
+        hasil_panen = HasilPanen.objects.all().order_by('tanggal_panen')
 
-    context = {
-    }
-    return render(request, 'prediksi.html', context)
-@login_required 
-def statistik_laba_rugi(request):
-    total_pendapatan = Pendapatan.objects.aggregate(total_pendapatan=Sum('total_pendapatan'))['total_pendapatan'] or 0
-    total_biaya = BiayaOperasional.objects.aggregate(total_biaya=Sum('jumlah_biaya'))['total_biaya'] or 0
-    laba_rugi = total_pendapatan - total_biaya
+        if not hasil_panen.exists():
+            return render(request, 'prediksi.html', {'error': 'Tidak ada data hasil panen yang tersedia.'})
 
-    context = {
-        'total_pendapatan': total_pendapatan,
-        'total_biaya': total_biaya,
-        'laba_rugi': laba_rugi,
-    }
-    return render(request, 'statistik_laba_rugi.html', context)
+        # Persiapkan data untuk model
+        tanggal = np.array([(panen.tanggal_panen - hasil_panen.first().tanggal_panen).days for panen in hasil_panen]).reshape(-1, 1)
+        jumlah_panen = np.array([float(panen.jumlah_panen) for panen in hasil_panen])
+
+        # Latih model Linear Regression
+        model = LinearRegression()
+        model.fit(tanggal, jumlah_panen)
+
+        # Prediksi 30 hari ke depan
+        prediksi_data = []
+        last_day = hasil_panen.last().tanggal_panen
+        for i in range(1, 31):
+            hari_ke = (last_day - hasil_panen.first().tanggal_panen).days + i
+            prediksi = model.predict(np.array([[hari_ke]]))[0]
+            prediksi_data.append({
+                'tanggal': (last_day + timedelta(days=i)).strftime('%Y-%m-%d'),
+                'jumlah_panen': round(prediksi, 2)
+            })
+
+        context = {
+            'prediksi_data': prediksi_data
+        }
+
+        return render(request, 'prediksi.html', context)
+
+    except Exception as e:
+        return render(request, 'prediksi.html', {'error': f'Terjadi kesalahan: {str(e)}'})
 
 
 # auth -------------------------------
@@ -129,6 +152,7 @@ def convert_decimal(data):
     return data
 def statistik_panen(request):
     # Statistik berdasarkan musim
+    
     statistik_musim = list(HasilPanen.objects.values('musim_tanam').annotate(total_panen=Sum('jumlah_panen')))
     statistik_musim = convert_decimal(statistik_musim)
 

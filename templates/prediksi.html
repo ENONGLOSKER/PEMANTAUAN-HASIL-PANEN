@@ -1,0 +1,53 @@
+<h2 class="text-xl font-bold mb-4">Prediksi Hasil Panen 30 Hari ke Depan</h2>
+
+{% if error %}
+<p class="text-red-500">{{ error }}</p>
+{% else %}
+<table class="table-auto border-collapse w-full mb-6">
+    <thead>
+        <tr class="bg-green-500 text-white">
+            <th class="border px-4 py-2">Tanggal</th>
+            <th class="border px-4 py-2">Prediksi Jumlah Panen (kg)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in prediksi_data %}
+        <tr class="bg-gray-100">
+            <td class="border px-4 py-2">{{ data.tanggal }}</td>
+            <td class="border px-4 py-2">{{ data.jumlah_panen }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Grafik Prediksi Panen -->
+<canvas id="panenChart" width="400" height="200"></canvas>
+{% endif %}
+
+<!-- Script untuk menampilkan grafik menggunakan Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('panenChart').getContext('2d');
+
+    const grafikPerkembangan = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ prediksi_data | safe }},
+    datasets: [{
+        label: 'Total Panen (kg)',
+        data: {{ prediksi_data | safe }},
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 2,
+        fill: false,
+            }]
+        },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+    });
+</script>

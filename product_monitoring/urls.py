@@ -28,9 +28,9 @@ urlpatterns = [
     path('singup/', views.signup_user, name="signup"),
     path('', views.index, name="index"),
     path('dashboard/', views.dashboard, name='dashboard'),
+    # FITUR TAMBAHAN
     path('statistik/', views.statistik_panen, name='statistik_panen'),
     path('prediksi/', views.prediksi_hasil_panen, name='prediksi_hasil_panen'),
-    path('laba/', views.statistik_laba_rugi, name='statistik_laba_rugi'),
     # BIAYA
     path('add/biaya/', views.input_biaya_operasional, name='add_biaya'),
     path('update/biaya/<int:id>', views.edit_biaya_operasional, name='update_biaya'),
