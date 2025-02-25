@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/home_pages.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/icon-fah.svg' %}" type="image/x-icon">
+    <title>Sistem Pemantauan Hasil Pertanian</title>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="#">
+                <img src="{% static 'img/logo.svg' %}" alt="">
+            </a>
+        </div>
+        <div class="hamburger" onclick="toggleMenu()">
+            &#9776;
+        </div>
+        <ul class="nav-menu">
+            <li><a href="{% url 'index' %}">Beranda</a></li>
+            <li><a href="#fitur">Fitur</a></li>
+            <li><a href="#about">Tentang Kami</a></li>
+            <li><a href="#kontak">Kontak</a></li>
+            <li><a href="{% url 'signup' %}">Register</a></li>
+            <li><a href="{% url 'signin' %}" id="btn-login">Login</a></li>
+        </ul>
+    </nav>
+
+    <header style="display: flex; padding-top: 80px;">
+        <div class="" style="background-color: white; padding: 40px; text-align: center; height: 75%;">
+            <h3 style="color: #FF7139; font-size: 35px; width: 60%; display: inline-block; margin-bottom: 20px;">Sistem Pemantauan Hasil Pertanian</h3>
+            <img src="{% static 'img/icon-login.svg' %}" alt="" style="width: 500px;">
+        </div>
+        <div class="" style="background-color: rgb(226, 226, 226); width: 60%; height: 75%; padding: 40px;">
+            <img src="{% static 'img/icon-logo.svg' %}" alt="" style="width: 100px;">
+            <h1 style="color: #FF7139; font-size: 35px;">Signin</h1>
+
+            <div class="" style="display: flex; justify-content: center;">
+                <form method="post" style="margin-top: 40px; display: flex; flex-direction: column; width: 65%;">
+                    {% csrf_token %}
+                    <label for="username" style="color: black; line-height: 40px; font-weight: 600;">
+                        Username
+                        <input type="text" name="username" required style="width: 100%; border: none; padding: 10px 20px; border-radius: 6px;">
+                    </label>
+                    <label for="password" style="color: black; line-height: 40px; font-weight: 600;">
+                        Password
+                        <input type="password" name="password" required style="width: 100%; border: none; padding: 10px 20px; border-radius: 6px;">
+                    </label>
+                    <button type="submit" style="padding: 10px 20px; margin-top: 50px; border-radius: 6px; background-color: #FF7139; color: white; font-size: 16px; font-weight: 600; border: none;">Login</button>
+                    <p style="color: black; text-align: center; margin-top: 40px;">Belum memiliki akun? <a href="{% url 'signup' %}" style="font-weight: 600; color: #FF7139; text-decoration: none;">Register</a></p>
+                </form>
+                
+            </div>
+        </div>
+    </header>
+
+    <script>
+
+        function toggleMenu() {
+            document.querySelector(".nav-menu").classList.toggle("active");
+        }
+    </script>
+
+</body>
+
+</html>

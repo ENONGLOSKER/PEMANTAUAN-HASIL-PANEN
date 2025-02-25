@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/home_pages.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/icon-fah.svg' %}" type="image/x-icon">
+    <title>Sistem Pemantauan Hasil Pertanian</title>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="#">
+                <img src="{% static 'img/logo.svg' %}" alt="">
+            </a>
+        </div>
+        <div class="hamburger" onclick="toggleMenu()">
+            &#9776;
+        </div>
+        <ul class="nav-menu">
+            <li><a href="{% url 'index' %}">Beranda</a></li>
+            <li><a href="#fitur">Fitur</a></li>
+            <li><a href="#about">Tentang Kami</a></li>
+            <li><a href="#kontak">Kontak</a></li>
+            <li><a href="{% url 'signup' %}">Register</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'signout' %}" id="btn-login">Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'signin' %}" id="btn-login">Login</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <header>
+        <div class="h-text">
+            {% if user.is_authenticated %}
+                <span style="background-color: #ff7139a1; padding: 5px 22px; border-radius: 50px; border: 2px solid #FF7139; transform: rotate(-4deg); display: inline-block; box-shadow: 2px 2px 40px #FF7139;">👋 Hai <span style="font-weight: 700;">{{user.username}}</span> farmer</span>
+            {% endif %}
+            <h1 style="margin-top: 12px;">Sistem Pemantauan Hasil Pertanian</h1>
+            <p>Solusi modern untuk mencatat, memantau, dan menganalisis hasil pertanian. Kelola hasil pertanianmu dengan
+                lebih efisien.</p>
+            <div class="btn-call">
+                <a href="{% url 'dashboard' %}" id="btn-start" style="text-decoration: none;">Get Started</a>
+                <a href="#gallery" id="btn-lengkap" style="text-decoration: none;">
+                    <div class="btn-img">
+                        <img src="{% static 'img/icon-chat.svg' %}" alt="">
+                    </div>
+                    Lebih Lengkap
+                </a>
+            </div>
+        </div>
+        <div class="h-image">
+            <img src="{% static 'img/hero.svg' %}" alt="">
+        </div>
+    </header>
+
+    <section class="features">
+        <span>Fitur Utama</span>
+
+        <div class="fitur-utama">
+            <div class="feature-item">
+                <div class="f-img">
+                    <img src="{% static 'img/icon-catat.svg' %}" alt="">
+                </div>
+                <div class="f-text">
+                    <h3>Pencatatan Hasil Panen</h3>
+                    <p>Catat hasil panen berdasarkan jenis tanaman, musim, lokasi, dan jumlah produksi dengan mudah.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-img">
+                    <img src="{% static 'img/icon-cart.svg' %}" alt="">
+                </div>
+                <div class="f-text">
+                    <h3>Statistik Panen</h3>
+                    <p>Analisis panen berdasarkan musim dan lokasi untuk meningkatkan produktivitas pertanian.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-img">
+                    <img src="{% static 'img/icon-uang.svg' %}" alt="">
+                </div>
+                <div class="f-text">
+                    <h3>Keuangan Pertanian</h3>
+                    <p>Kelola biaya operasional dan pendapatan dari hasil panen dengan sistem pencatatan otomatis.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="ab-text">
+            <span>Tentang Kami</span>
+            <h2>Misi Kami</h2>
+            <p>Sistem ini dikembangkan untuk membantu siswa Sekolah Menengah Kejuruan (SMK) jurusan Agribisnis Tanaman Pangan dan Holtikultura (ATPH) dalam memahami, menguasai, dan menerapkan teknologi digital dalam pertanian modern, sehingga mereka dapat menjadi agen perubahan yang mampu meningkatkan produktivitas dan kesejahteraan petani di masa depan.</p>
+        </div>
+        <div class="ab-img">
+            <img src="{% static 'img/icon-padi.svg' %}" alt="">
+        </div>
+    </section>
+
+    <section class="gallery" id="gallery">
+        <div class="g-text">
+            <span>Galeri Kegiatan</span>
+            <h2>Menjelajahi Kegiatan Kami</h2>
+        </div>
+
+        <div class="gallery-menu">
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+            <div class="gallery-item">
+                <img src="{% static 'img/icon-galery.svg' %}" alt="">
+                <h3>Panen Padi</h3>
+                <p>Produksi padi di wilayah Jawa Timur telah meningkat signifikan di tahun 2023.</p>
+                <a href="#">Selengkapnya</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="keunggulan" id="fitur"  style="margin: 50px 0;">
+        <div class="k-text" style="text-align: center; margin-bottom: 40px;">
+            <span>Fitur Utama</span>
+            <h2>Keunggulan Fitur</h2>
+        </div>
+
+        <div class="ungggul" style="background-color: #13A484; padding: 80px 120px; display: flex; justify-content: space-between; gap: 10px;">
+            <img src="{% static 'img/iconunggul.svg' %}" alt="" style="width: 600px;">
+
+            <div class="k-judul" style="width: 40%;" >
+                <div class="judul" style="display: flex; align-items: center; gap: 8px; color: #64FF9F;">
+                    <img src=" {% static 'img/icon-daun.svg' %} " alt="" style="transform: translateY(-5px);">
+                    <h2>Farming</h2>
+                </div>
+
+                <h3 style="font-size: 40px; color: white; text-transform: capitalize; margin-bottom: 25px;">solusi inovatif dalam dunia pertanian</h3>
+
+                <ul style="display: flex; flex-direction: column; gap: 20px;">
+                    <li style="list-style: none;">
+                        <h4 style="display: flex; gap: 4px; color: #64FF9F;">
+                            <img src="{% static 'img/icon-cek.svg' %}" alt="" style="width: 22px; transform: translateY(-3px);"> 
+                            Pencatatan Hasil Panen yang Mudah
+                        </h4>
+                        <p style="margin-left: 24px; color: aliceblue;">Data hasil panen dapat dicatat dengan cepat dan tersimpan secara digital.</p>
+                    </li>
+                    <li style="list-style: none;">
+                        <h4 style="display: flex; gap: 4px; color: #64FF9F;">
+                            <img src="{% static 'img/icon-cek.svg' %}" alt="" style="width: 22px; transform: translateY(-3px);"> 
+                            Analisis Statistik Otomatis
+                        </h4>
+                        <p style="margin-left: 24px; color: aliceblue;">Menampilkan grafik dan laporan panen berdasarkan musim, jenis tanaman, dan lokasi.</p>
+                    </li>
+                    <li style="list-style: none;">
+                        <h4 style="display: flex; gap: 4px; color: #64FF9F;">
+                            <img src="{% static 'img/icon-cek.svg' %}" alt="" style="width: 22px; transform: translateY(-3px);"> 
+                            Pengelolaan Keuangan Pertanian
+                        </h4>
+                        <p style="margin-left: 24px; color: aliceblue;">Mencatat biaya operasional dan pendapatan hasil panen secara transparan.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        
+    </section>
+
+    <section class="keunggulan" id="kontak" style="margin: 100px 0;">
+        <div class="k-text" style="text-align: center;">
+            <span>Kontak Kami</span>
+            <h2>Info Selengkapnya</h2>
+        </div>
+
+        <div class="ungggul" style="padding: 10px 120px; display: flex; justify-content: space-between; gap: 40px;">
+            <img src="{% static 'img/icon-padi.svg' %}" alt="" style="width: 600px;">
+
+            <div class="k-judul" style="width: 100%;" >
+                
+                <h3 style="font-size: 40px; color: rgb(0, 0, 0); text-transform: capitalize; margin-bottom: 25px;">Hubungi Kami disini</h3>
+                <p style="font-size: 20px; color: rgb(108, 108, 108); margin-top: -20px; margin-bottom: 40px;">Informasi lengkap kontak kami</p>
+
+                <ul style="display: flex; flex-direction: column; gap: 40px;">
+                    <li style="list-style: none;">
+                        <h4 style="display: flex; gap: 10px; color: black; font-size: 18px;">
+                            <img src="{% static 'img/icon-wa.svg' %}" alt="" style="width: 50px; transform: translateY(-3px);"> 
+                            WhatsApp
+                        </h4>
+                        <p style="margin-left: 60px; margin-top: -25px; color: #13A484; font-weight: 700;">+62 819-3964-6943</p>
+                    </li>
+                    <li style="list-style: none;">
+                        <h4 style="display: flex; gap: 10px; color: black; font-size: 18px;">
+                            <img src="{% static 'img/icon-email.svg' %}" alt="" style="width: 50px; transform: translateY(-3px);"> 
+                            Email
+                        </h4>
+                        <p style="margin-left: 60px; margin-top: -25px; color: #13A484; font-weight: 700;">admin@gmail.com</p>
+                    </li>
+                    <li style="list-style: none;">
+                        <h4 style="display: flex; gap: 10px; color: black; font-size: 18px;">
+                            <img src="{% static 'img/icon-hp.svg' %}" alt="" style="width: 50px; transform: translateY(-3px);"> 
+                            Telepon
+                        </h4>
+                        <p style="margin-left: 60px; margin-top: -25px; color: #13A484; font-weight: 700;">+62 819-3964-6943</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        
+    </section>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-menu").classList.toggle("active");
+        }
+    </script>
+
+</body>
+
+</html>
