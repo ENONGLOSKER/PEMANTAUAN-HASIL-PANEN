@@ -30,8 +30,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     # FITUR TAMBAHAN
     path('statistik/', views.statistik_panen, name='statistik_panen'),
-    path('prediksi/', views.prediksi_hasil_panen, name='prediksi_hasil_panen'),
-    # BIAYA
+    # biaya operasional
     path('add/biaya/', views.input_biaya_operasional, name='add_biaya'),
     path('update/biaya/<int:id>', views.edit_biaya_operasional, name='update_biaya'),
     path('delete/biaya/<int:id>', views.delete_biaya_operasional, name='delete_biaya'),

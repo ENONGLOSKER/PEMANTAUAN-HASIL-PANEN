@@ -25,8 +25,6 @@ class HasilPanen(models.Model):
     def __str__(self):
         return f"{self.tanaman.nama_tanaman} - {self.jumlah_panen} kg"
     
-from django.db import models
-
 class BiayaOperasional(models.Model):
     KATEGORI_CHOICES = [
         ('pupuk', 'Pupuk'),

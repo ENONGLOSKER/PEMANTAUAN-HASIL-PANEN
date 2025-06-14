@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tanaman, HasilPanen, Pendapatan, BiayaOperasional
 from .forms import HasilPanenForm, BiayaOperasionalForm, PendapatanForm, TanamanForm
+# -----------------------------------------------------------------------------------
 from django.db.models import Sum, Avg
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -8,105 +9,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 import json
 from decimal import Decimal
-
-# model tren
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import HasilPanen
 from datetime import timedelta, date
 import numpy as np
 from sklearn.linear_model import LinearRegression
+# -----------------------------------------------------------------------------------
 
-@login_required
-def prediksi_hasil_panen(request):
-    try:
-        # Ambil data panen dari database
-        hasil_panen = HasilPanen.objects.all().order_by('tanggal_panen')
-
-        if not hasil_panen.exists():
-            return render(request, 'prediksi.html', {'error': 'Tidak ada data hasil panen yang tersedia.'})
-
-        # Persiapkan data untuk model
-        tanggal = np.array([(panen.tanggal_panen - hasil_panen.first().tanggal_panen).days for panen in hasil_panen]).reshape(-1, 1)
-        jumlah_panen = np.array([float(panen.jumlah_panen) for panen in hasil_panen])
-
-        # Latih model Linear Regression
-        model = LinearRegression()
-        model.fit(tanggal, jumlah_panen)
-
-        # Prediksi 30 hari ke depan
-        prediksi_data = []
-        last_day = hasil_panen.last().tanggal_panen
-        for i in range(1, 31):
-            hari_ke = (last_day - hasil_panen.first().tanggal_panen).days + i
-            prediksi = model.predict(np.array([[hari_ke]]))[0]
-            prediksi_data.append({
-                'tanggal': (last_day + timedelta(days=i)).strftime('%Y-%m-%d'),
-                'jumlah_panen': round(prediksi, 2)
-            })
-
-        context = {
-            'prediksi_data': prediksi_data
-        }
-
-        return render(request, 'prediksi.html', context)
-
-    except Exception as e:
-        return render(request, 'prediksi.html', {'error': f'Terjadi kesalahan: {str(e)}'})
-
-
-# auth -------------------------------
-def signout_user(request):
-    logout(request)
-    messages.success(request, "Logout berhasil!")
-    return redirect("index")
-def signup_user(request):
-    if request.method == "POST":
-        email = request.POST["email"]
-        username = request.POST["username"]
-        password = request.POST["password"]
-        confirm_password = request.POST["confirm_password"]
-        
-        if password != confirm_password:
-            messages.error(request, "Password tidak cocok!")
-            return redirect("signup")
-        
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username sudah digunakan!")
-            return redirect("signup")
-        
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
-        messages.success(request, "Akun berhasil dibuat! Silakan login.")
-        return redirect("signin")
-    
-    return render(request, "signup.html")
-def signin_user(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            messages.success(request, "Login berhasil!")
-            if user.is_superuser:
-                return redirect('dashboard')
-            else:
-                return redirect('dashboard')
-        else:
-            messages.error(request, "Username atau password salah!")
-            return redirect("signin")
-    
-    if request.user.is_authenticated:
-        if request.user.is_superuser:
-            return redirect('dashboard')
-        else:
-            return redirect('index')
-    
-    return render(request, "singin.html")
-
+# halaman utama
 def index(request):
     return render(request, 'index.html')
 
@@ -119,6 +27,7 @@ def dashboard(request):
 
     # Hitung laba atau rugi
     laba_rugi = total_pendapatan - total_biaya_operasional
+    print(f'laba_rugi: {laba_rugi}')
     if laba_rugi > 0:
         status_laba_rugi = f"Laba {laba_rugi/total_biaya_operasional*100:.2f}%"
     elif laba_rugi < 0:
@@ -138,59 +47,11 @@ def dashboard(request):
         'total_biaya_operasional': total_biaya_operasional,
         'labels': labels,
         'values': values,
+        'laba_rugi': laba_rugi,
         'status_laba_rugi': status_laba_rugi,
     }
 
     return render(request, 'dashboards.html', context)
-
-def convert_decimal(data):
-    """Konversi semua nilai Decimal menjadi float."""
-    for item in data:
-        for key, value in item.items():
-            if isinstance(value, Decimal):
-                item[key] = float(value)
-    return data
-def statistik_panen(request):
-    # Statistik berdasarkan musim
-    
-    statistik_musim = list(HasilPanen.objects.values('musim_tanam').annotate(total_panen=Sum('jumlah_panen')))
-    statistik_musim = convert_decimal(statistik_musim)
-
-    # Statistik berdasarkan jenis tanaman
-    statistik_jenis = list(HasilPanen.objects.values('tanaman__nama_tanaman').annotate(total_panen=Sum('jumlah_panen')))
-    statistik_jenis = convert_decimal(statistik_jenis)
-
-    # Statistik berdasarkan lokasi
-    statistik_lokasi = list(HasilPanen.objects.values('lokasi_lahan').annotate(total_panen=Sum('jumlah_panen')))
-    statistik_lokasi = convert_decimal(statistik_lokasi)
-
-    # Rekomendasi tanam berdasarkan produktivitas tertinggi
-    rekomendasi = []
-    for item in statistik_musim:
-        musim = item['musim_tanam']
-        hasil_tertinggi = HasilPanen.objects.filter(musim_tanam=musim).order_by('-jumlah_panen').first()
-        if hasil_tertinggi:
-            rekomendasi.append({
-                'musim': musim,
-                'tanaman': hasil_tertinggi.tanaman.nama_tanaman,
-                'produktivitas': float(hasil_tertinggi.jumlah_panen),  # Konversi langsung ke float
-            })
-
-    # grafik
-    data = HasilPanen.objects.values('tanggal_panen').annotate(total_panen=Sum('jumlah_panen'))
-    labels = [item['tanggal_panen'].strftime('%Y-%m-%d') for item in data]
-    values = [float(item['total_panen']) for item in data]
-
-    # Konversi ke JSON
-    context = {
-        'statistik_musim': json.dumps(statistik_musim),
-        'statistik_jenis': json.dumps(statistik_jenis),
-        'statistik_lokasi': json.dumps(statistik_lokasi),
-        'rekomendasi': json.dumps(rekomendasi),
-        'labels': labels,
-        'values': values,
-    }
-    return render(request, 'db_statistik.html', context)
 
 # BIAYA OPRASIONAL
 @login_required
@@ -237,14 +98,32 @@ def delete_biaya_operasional(request, id):
 # PENDAPATAN
 @login_required 
 def pendapatan(request):
-    pendapatan = Pendapatan.objects.all()
-    biaya = BiayaOperasional.objects.all()
+    data_pendapatan = Pendapatan.objects.all()
+    data_biayaoperasional = BiayaOperasional.objects.all()
+    pendapatan_data = Pendapatan.objects.select_related('hasil_panen__tanaman') #ambil data hasil panen
+    rekapitulasi = []
+
+    for pendapatan in pendapatan_data:
+        hasil_panen = pendapatan.hasil_panen
+        total_biaya = BiayaOperasional.objects.filter(hasil_panen=hasil_panen).aggregate(total=Sum('jumlah_biaya'))['total'] or 0
+        total_pendapatan = pendapatan.total_pendapatan or 0
+        # print(f'total_pendapatan: {total_pendapatan}')
+        laba = total_pendapatan - total_biaya
+        # print(f'laba: {laba}')
+        rekapitulasi.append({
+            'hasil_panen': f"{hasil_panen.tanaman.nama_tanaman} ({hasil_panen.jumlah_panen} kg)",
+            'total_pendapatan': total_pendapatan,
+            'total_biaya': total_biaya,
+            'laba': laba,
+        })
 
     context = {
-        'pendapatan':pendapatan,
-        'biaya':biaya,
+        'rekapitulasi': rekapitulasi,
+        'data_pendapatan': data_pendapatan,
+        'data_biayaoperasional': data_biayaoperasional,
     }
     return render(request, 'db_keuangan.html', context)
+
 @login_required 
 def input_pendapatan(request):
     if request.method == 'POST':
@@ -348,3 +227,133 @@ def delete_hasil_panen(request, id):
     hasil_panen.delete()
     messages.success(request, 'Data hasil panen berhasil dihapus.')
     return redirect('hasil_panen')
+
+# STATISTIK PANEN
+def convert_decimal(data):
+    """
+    Konversi semua nilai Decimal menjadi float. 
+    Fungsi ini mengubah angka-angka dari format Decimal menjadi format float. Angka-angka akan tampil dengan format yang tidak rapi (terlalu banyak angka di belakang koma) makanya harus disederhanakan, supaya tidak terlalu panjang, lebih rapi dan memudahkan saat dibaca serta konsisten dalam penggunaannya.
+    contoh: 10.50000000000000000 menjadi 10.5
+    """
+    for item in data:
+        for key, value in item.items():
+            if isinstance(value, Decimal):
+                item[key] = float(value)
+    return data
+
+@login_required  
+def statistik_panen(request):
+    hasil_panen_qs = HasilPanen.objects.select_related('tanaman')
+    
+    # Statistik berdasarkan musim
+    statistik_musim = list(
+        hasil_panen_qs.values('musim_tanam')
+        .annotate(total_panen=Sum('jumlah_panen'))
+        .order_by('musim_tanam')
+    )
+    statistik_musim = convert_decimal(statistik_musim)
+
+    # Statistik berdasarkan jenis tanaman
+    statistik_jenis = list(
+        hasil_panen_qs.values('tanaman__nama_tanaman')
+        .annotate(total_panen=Sum('jumlah_panen'))
+        .order_by('tanaman__nama_tanaman')
+    )
+    statistik_jenis = convert_decimal(statistik_jenis)
+
+    # Statistik berdasarkan lokasi
+    statistik_lokasi = list(
+        hasil_panen_qs.values('lokasi_lahan')
+        .annotate(total_panen=Sum('jumlah_panen'))
+        .order_by('lokasi_lahan')
+    )
+    statistik_lokasi = convert_decimal(statistik_lokasi)
+
+    # Rekomendasi tanam berdasarkan produktivitas tertinggi
+    rekomendasi = []
+    for musim in hasil_panen_qs.values_list('musim_tanam', flat=True).distinct():
+        hasil_tertinggi = (
+            hasil_panen_qs.filter(musim_tanam=musim)
+            .select_related('tanaman')
+            .order_by('-jumlah_panen')
+            .first()
+        )
+        if hasil_tertinggi:
+            rekomendasi.append({
+                'musim': musim,
+                'tanaman': hasil_tertinggi.tanaman.nama_tanaman,
+                'produktivitas': float(hasil_tertinggi.jumlah_panen),
+            })
+
+    # Grafik
+    data = (
+        hasil_panen_qs.values('tanggal_panen')
+        .annotate(total_panen=Sum('jumlah_panen'))
+        .order_by('tanggal_panen')
+    )
+    labels = [item['tanggal_panen'].strftime('%Y-%m-%d') for item in data]
+    values = [float(item['total_panen']) for item in data]
+
+    context = {
+        'statistik_musim': json.dumps(statistik_musim),
+        'statistik_jenis': json.dumps(statistik_jenis),
+        'statistik_lokasi': json.dumps(statistik_lokasi),
+        'rekomendasi': json.dumps(rekomendasi),
+        'labels': labels,
+        'values': values,
+    }
+    return render(request, 'db_statistik.html', context)
+
+
+# auth 
+def signout_user(request):
+    logout(request)
+    messages.success(request, "Logout berhasil!")
+    return redirect("index")
+def signup_user(request):
+    if request.method == "POST":
+        email = request.POST["email"]
+        username = request.POST["username"]
+        password = request.POST["password"]
+        confirm_password = request.POST["confirm_password"]
+        
+        if password != confirm_password:
+            messages.error(request, "Password tidak cocok!")
+            return redirect("signup")
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username sudah digunakan!")
+            return redirect("signup")
+        
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.save()
+        messages.success(request, "Akun berhasil dibuat! Silakan login.")
+        return redirect("signin")
+    
+    return render(request, "signup.html")
+def signin_user(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, "Login berhasil!")
+            if user.is_superuser:
+                return redirect('dashboard')
+            else:
+                return redirect('dashboard')
+        else:
+            messages.error(request, "Username atau password salah!")
+            return redirect("signin")
+    
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('dashboard')
+        else:
+            return redirect('index')
+    
+    return render(request, "singin.html")
+
